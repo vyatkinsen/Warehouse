@@ -14,6 +14,8 @@ struct ProductView: View {
     @State private var description: String = ""
     
     @State private var canSave: Bool
+
+    @State private var showAlert = false
     
     private let fromScanner: Bool
     
@@ -84,12 +86,19 @@ struct ProductView: View {
                     if let id = product.id {
                         QRPrintButtonView(id: id)
                         Button(role: .destructive) {
-                            viewModel.onDelete(id: id) {
-                                onClose(true)
-                            }
+                            showAlert = true
                         } label: {
                             Label("Удалить товар", systemImage: "trash")
                                 .foregroundColor(.red)
+                        }
+                        .alert("Вы уверены, что хотите удалить этот элемент?", isPresented: $showAlert) {
+                            Button("Отмена", role: .cancel) { }
+                            Button("Удалить", role: .destructive) {
+                                viewModel.onDelete(id: id) {
+                                    onClose(true)
+                                }
+                                showAlert = false
+                            }
                         }
                     }
 
