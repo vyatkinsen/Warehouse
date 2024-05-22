@@ -1,0 +1,457 @@
+openapi: 3.0.0
+info:
+  title: Warehouse Management API
+  description: This API helps employees of a company to manage inventory on a production warehouse.
+  version: 1.0.5
+security:
+  - JWT: []
+paths:
+  /auth:
+    get:
+      operationId: getAuth
+      summary: Returns user token if success
+      description: Is unprotected example of authorization request
+      parameters:
+        - in: query
+          name: login
+          required: true
+          description: The login of the user
+          schema:
+            type: string
+        - in: query
+          name: password
+          required: true
+          description: The password of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A auth token of user
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: User not found, or incorrect password
+  /projects:
+    get:
+      operationId: getProjects
+      summary: Returns a list of projects
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        '200':
+          description: A JSON array of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /projects/{projectId}/warehouses:
+    get:
+      operationId: getWarehouses
+      summary: Returns a list of warehouses for a given project
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          description: The id of the project to retrieve warehouses for
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A JSON array of warehouses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Warehouse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Project not found
+  /warehouses/{warehouseId}/products:
+    get:
+      operationId: getProducts
+      summary: Returns a list of products for a given warehouse with paginating
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - in: path
+          name: warehouseId
+          required: true
+          description: The id of the warehouse to retrieve products for
+          schema:
+            type: integer
+        - in: query
+          name: page
+          required: true
+          description: The number of required page
+          schema:
+            type: integer
+        - in: query
+          name: per_page
+          required: true
+          description: The count of items per page
+          schema:
+            type: integer
+        - in: query
+          name: searchFilter
+          description: The search field
+          schema:
+            type: string
+        - in: query
+          name: sort
+          required: true
+          description: The type of sort
+          schema:
+            type: string
+            enum:
+              - byNameAscending
+              - byNameDescending
+              - byCountAscending
+              - byCountDescending
+      responses:
+        '200':
+          description: A JSON array of product cards
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResult"
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Warehouse not found
+        '406':
+          description: Number of page incorrect or count items per page is invalid
+  /product:
+    get:
+      operationId: getProduct
+      summary: Find product by id
+      parameters:
+        - in: query
+          name: productId
+          required: true
+          description: The id of product
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A find product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Product not found
+    post:
+      operationId: postProduct
+      summary: Adds a new product to a given warehouse
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - in: query
+          name: warehouseId
+          required: true
+          description: The id of the warehouse to add the product to
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid input
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Warehouse not found
+    put:
+      operationId: putProduct
+      summary: Updates a product card by id
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid input
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Product not found
+    delete:
+      operationId: deleteProduct
+      summary: Deletes a product by id
+      parameters:
+        - in: query
+          name: productId
+          required: true
+          description: The id of the product to delete
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product deleted
+        '400':
+          description: Invalid input
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Product not found
+  /product/{productId}/path:
+    get:
+      operationId: getPathForProduct
+      summary: Get path (names of project and warehouse) for given product id
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: The id of product
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPath'
+        '400':
+          description: Invalid input
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /product/encrypt:
+    post:
+      operationId: encryptId
+      summary: Encrypt given id of product
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid input
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /product/decrypt:
+    post:
+      operationId: decryptId
+      summary: Decrypt given id of product
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: integer
+        '400':
+          description: Invalid input
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /product/{productId}/photo:
+    get:
+      operationId: getPhoto
+      summary: Returns a product photo by id
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: The id of the product to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A product photo
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Ok, but no photo
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Product not found
+    post:
+      operationId: postPhoto
+      summary: Download a product photo by id
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: The id of the product to download photo
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Product photo uploaded
+        '400':
+          description: Invalid input
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Product not found
+    delete:
+      operationId: deletePhoto
+      summary: Delete a product photo by id
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: The id of the product to download photo
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product photo deleted
+        '400':
+          description: Invalid input
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Product not found
+      
+components:
+  securitySchemes:
+    JWT:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    Project:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          description: The auto-generated id of the project
+          readOnly: true
+        name:
+          type: string
+          description: The name of the project
+    Warehouse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          description: The auto-generated id of the warehouse
+          readOnly: true
+        name:
+          type: string
+          description: The name of the warehouse
+    Product:
+      type: object
+      required:
+        - name
+        - quantity
+      properties:
+        id:
+          type: integer
+          description: The auto-generated id of the product
+          readOnly: true
+        name:
+          type: string
+          description: The name of the product
+        quantity:
+          type: integer
+          description: The quantity of the product in stock
+          minimum: 0
+        description:
+          type: string
+          description: The optional description of the product
+    ProductPath:
+      type: object
+      required:
+        - projectName
+        - warehouseName
+      properties:
+        projectName:
+          type: string
+          description: The name of project
+          readOnly: true
+        warehouseName:
+          type: string
+          description: The name of warehouse
+          readOnly: true
+    PaginatedResult:
+      type: object
+      required:
+        - total
+        - has_next
+        - has_prev
+      properties:
+        total:
+          type: integer
+          description: Count of all items
+        has_next:
+          type: boolean
+          description: Is next page exist
+        has_prev:
+          type: boolean
+          description: Is previous page exist
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
