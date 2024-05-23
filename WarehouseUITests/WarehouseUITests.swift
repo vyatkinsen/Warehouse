@@ -45,29 +45,48 @@ final class WarehouseUITests: XCTestCase {
         qrTab.tap()
     }
     
-    func testProjectsList() {
+    func testProjectsList() throws {
+        try testHomeTabNavigation()
         let button = app.buttons["UITest"]
         button.tap()
     }
     
     
-    func testWarehousesList() {
-        testProjectsList()
+    func testWarehousesList() throws {
+        try testProjectsList()
         let button = app.buttons["Большой"]
         button.tap()
     }
     
-    func testWarehousesProducts() {
-        testWarehousesList()
-        let button = app.cells.staticTexts["Test"]
-        button.tap()
+    func testAddProduct() throws {
+        try testWarehousesList()
+        addProduct(name: "Test")
+        
+        XCTAssertTrue(app.cells.staticTexts["Test"].exists)
+    }
+    
+    private func addProduct(name: String) {
+        let addNewProductButton = app.buttons["addNewProductButton"]
+        XCTAssertTrue(addNewProductButton.exists, "Кнопка 'addNewProductButton' должна существовать")
+        addNewProductButton.tap()
+        
+        let nameField = app.textFields["nameField"]
+        nameField.tap()
+        nameField.typeText("\(name)\n")
+        
+        let stepper = app.steppers["quantityStepper"]
+        stepper.buttons["Increment"].tap()
+
+        let addButton = app.buttons["addOrUpdateButton"]
+        addButton.tap()
     }
     
     func testSorting() throws {
         try testHomeTabNavigation()
-        testWarehousesList()
+        try testWarehousesList()
 
-        XCTAssertTrue(app.cells.firstMatch.staticTexts["Test"].exists, "Первый элемент должен иметь текст 'Test'")
+        let sortNameZA: String = "ЯЯЯЯ"
+        addProduct(name: sortNameZA)
 
         let sortButton = app.buttons["Сортировка"]
         XCTAssertTrue(sortButton.exists, "Кнопка 'Сортировка' должна существовать")
@@ -77,15 +96,6 @@ final class WarehouseUITests: XCTestCase {
         XCTAssertTrue(sortByNameButton.exists, "Кнопка сортировки 'По имени, я..а' должна существовать")
         sortByNameButton.tap()
 
-        XCTAssertTrue(app.cells.firstMatch.staticTexts["Продукт 999"].exists, "Первый элемент должен иметь текст 'Продукт 999' после сортировки")
-    }
-
-    
-    func testProduct() {
-        testWarehousesProducts()
-        let descr = app.textFields["Наименование"]
-        XCTAssertEqual(descr.value as? String, "Test")
-        descr.tap()
-        descr.typeText("Тестовое описание\n")
+        XCTAssertTrue(app.cells.firstMatch.staticTexts[sortNameZA].exists, "Первый элемент должен иметь текст '\(sortNameZA)' после сортировки")
     }
 }

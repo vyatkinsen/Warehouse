@@ -50,12 +50,14 @@ struct ProductsView: View {
         }
         .navigationTitle(warehouseName)
         .searchable(text: $searchText)
+        .accessibilityIdentifier("productSearchField")
         .toolbar {
             Button {
                 addNewProduct.toggle()
             } label: {
                 Image(systemName: "plus")
             }
+            .accessibilityIdentifier("addNewProductButton")
             Menu {
                 Picker("Сортировка", selection: $sort) {
                     ForEach(sortNames, id: \.0) { item in

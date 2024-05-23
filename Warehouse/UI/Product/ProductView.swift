@@ -71,6 +71,8 @@ struct ProductView: View {
                 }
                 Section("Описание") {
                     TextField("Наименование", text: $name)
+                        .accessibilityIdentifier("nameField")
+
                     
                     Stepper {
                         TextField("Количество", value: $quantity, format: .number)
@@ -80,8 +82,11 @@ struct ProductView: View {
                     } onDecrement: {
                         quantity -= 1
                     }
+                    .accessibilityIdentifier("quantityStepper")
                     
                     TextField("Описание", text: $description, axis: .vertical)
+                        .accessibilityIdentifier("descriptionField")
+
                     
                     if let id = product.id {
                         QRPrintButtonView(id: id)
@@ -125,6 +130,7 @@ struct ProductView: View {
                         onClose(true)
                     }
                 }
+                .accessibilityIdentifier("addOrUpdateButton")
                 .disabled(!canSave)
             }
         }
