@@ -23,8 +23,13 @@ struct QRScanTabView: View {
                     }
                 }
             } else {
-                Text("Back camera not available")
-                    .foregroundColor(.red)
+                Text("Ошибка подключения к камере")
+                    .font(.title2)
+                    .multilineTextAlignment(.leading)
+                    .padding(10)
+                Text("Задняя камера устройства недоступна")
+                    .foregroundStyle(.red)
+                    .padding(10)
             }
         }
     }

@@ -26,7 +26,7 @@ struct ProductPhotoView: View {
                 Button(role: .destructive) {
                     viewModel.deletePhoto()
                 } label: {
-                    Label("Удалить", systemImage: "trash")
+                    Label("Удалить фото", systemImage: "trash")
                         .foregroundColor(.red)
                 }
             } else {

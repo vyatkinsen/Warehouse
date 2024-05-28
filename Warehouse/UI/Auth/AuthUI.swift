@@ -20,25 +20,13 @@ struct AuthUI: View {
             }
             
             if let connectionError = viewModel.connectionError {
-                Text("Ошибка подключения к серверу")
-                    .font(.title2)
-                    .multilineTextAlignment(.leading)
-                    .padding(10)
-                Text(connectionError)
-                    .foregroundStyle(.red)
-                    .padding(10)
+                errorText("Ошибка подключения к серверу", connectionError)
             }
             
             if let serverError = viewModel.serverError {
-                Text("Ошибка при выполнении запроса")
-                    .multilineTextAlignment(.leading)
-                    .font(.title2)
-                    .padding(10)
-                Text(serverError)
-                    .foregroundStyle(.red)
-                    .padding(10)
-//                errorText("Ошибка при выполнении запроса (\(serverError))")
+                errorText("Ошибка при выполнении запроса", serverError)
             }
+            
             Text("Для авторизации в приложении введите логин и пароль")
                 .font(.title2)
                 .multilineTextAlignment(.center)
@@ -88,10 +76,14 @@ struct AuthUI: View {
     }
     
     @ViewBuilder
-    func errorText(_ errorText: String) -> some View {
+    func errorText(_ errorText: String, _ viewModelError: String) -> some View {
         Text(errorText)
+            .font(.title2)
+            .multilineTextAlignment(.leading)
+            .padding(10)
+        Text(viewModelError)
             .foregroundStyle(.red)
-            .padding()
+            .padding(10)
     }
 }
 

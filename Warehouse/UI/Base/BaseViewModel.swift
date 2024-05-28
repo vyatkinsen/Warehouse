@@ -57,16 +57,12 @@ class BaseViewModel<Item>: ObservableObject {
                     self.receiveValue(result: $0, onData: onData)
                 }
             )
-        
         reset()
         
         Task {
             loading = true
-            
             await load(subject)
-            
             loading = false
-            
             detectionCancellable.cancel()
         }
     }

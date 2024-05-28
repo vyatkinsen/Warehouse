@@ -2,7 +2,6 @@ import Foundation
 import OpenAPIRuntime
 
 protocol APIDataProtocol {
-    
     func getAuth(login: String, password: String) async -> DataResponse<String>
     
     func getProjects() async -> DataResponse<[Project]>
@@ -23,6 +22,8 @@ protocol APIDataProtocol {
     
     func putProduct(product: Product) async -> DataResponse<Product>
     
+    func deleteProduct(productId: Int) async -> DataResponse<Void>
+    
     func getPathForProduct(productId: Int) async -> DataResponse<ProductPath>
     
     func encryptId(id: Int) async -> DataResponse<String>
@@ -35,3 +36,4 @@ protocol APIDataProtocol {
     
     func deletePhoto(productId: Int) async -> DataResponse<Void>
 }
+

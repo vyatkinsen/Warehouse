@@ -15,26 +15,14 @@ struct BaseView<Item, Content>: View where Content : View {
             if viewModel.loading {
                 ProgressView()
             } else if let connectionError = viewModel.connectionError {
-                Text("Ошибка подключения к серверу")
-                    .font(.title2)
-                    .multilineTextAlignment(.leading)
-                    .padding(10)
-                Text(connectionError)
-                    .foregroundStyle(.red)
-                    .padding(10)
+                errorText("Ошибка подключения к серверу", connectionError)
             } else if let serverError = viewModel.serverError {
-                Text("Ошибка при выполнении запроса")
-                    .multilineTextAlignment(.leading)
-                    .font(.title2)
-                    .padding(10)
-                Text(serverError)
-                    .foregroundStyle(.red)
-                    .padding(10)
+                errorText("Ошибка при выполнении запроса", serverError)                    
                     .onAppear {
-                        if serverError == "Адрес сервера не установлен" {
-                            showingAlert = true
-                        }
+                    if serverError == "Адрес сервера не установлен" {
+                        showingAlert = true
                     }
+                }
             } else if let item = viewModel.item {
                 content(item)
             } else {
@@ -57,5 +45,16 @@ struct BaseView<Item, Content>: View where Content : View {
                 })
             )
         }
+    }
+    
+    @ViewBuilder
+    func errorText(_ errorText: String, _ viewModelError: String) -> some View {
+        Text(errorText)
+            .font(.title2)
+            .multilineTextAlignment(.leading)
+            .padding(10)
+        Text(viewModelError)
+            .foregroundStyle(.red)
+            .padding(10)
     }
 }
